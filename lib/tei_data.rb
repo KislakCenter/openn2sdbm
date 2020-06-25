@@ -2,6 +2,26 @@
 
 require 'nokogiri'
 require 'iso-639'
+require 'csv'
+require 'open-uri'
+
+COLLECTION_CSV_URI = 'https://openn.library.upenn.edu/Data/collections.csv'.freeze
+
+def collection_data
+  return @collection_data if @collection_data
+  @collection_data = {}
+  # repository_id,collection_tag,collection_type,metadata_type,collection_name
+  URI.open(COLLECTION_CSV_URI) { |f| CSV.parse f, headers: true }.each do |row|
+    repository_id = sprintf '%04d', row['repository_id'].to_i
+    @collection_data[repository_id] = row['collection_name']
+  end
+  @collection_data
+end
+
+def collection_name collection_id
+  # binding.pry
+  collection_data[sprintf '%04d', collection_id.to_i]
+end
 
 def extract_langs xml
   langs = []
@@ -13,7 +33,14 @@ def extract_langs xml
   langs.map { |x| ISO_639.find_by_code(x).english_name }.join ';'
 end
 
+# TODO: Email repository list to Emma
+# TODO: Look at 500 fields and figure out what does into "other_info"
+# TODO: Pull in decorations, script, notes, origin into "other_info" as a block http://openn.library.upenn.edu/Data/0032/html/ms_or_045.html
+# TODO: Pull in Vernacular script with titles and names (authors, etc.)
+
+
 def extract_provenance xml
+  # TODO: Move origin to other info
   (prov ||= []) << xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').text
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/provenance').empty?
     prov += xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/provenance').map(&:text).uniq
@@ -113,3 +140,5 @@ end
 # data = extract_data open tei_file
 #
 # puts data
+
+# puts collection_name 10

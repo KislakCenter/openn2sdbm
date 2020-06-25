@@ -35,7 +35,7 @@ CSV headers: true do |csv|
     tei_file = "#{BASE_URI}/#{path}/data/#{base}_TEI.xml"
     out_row = extract_data URI.open tei_file
     # we need to add collection and url
-    out_row[:collection] = sprintf "%04d", row['repository_id']
+    out_row[:collection] = collection_name row['repository_id']
     out_row[:manuscript_link] = tei_file
 
     csv << out_row
