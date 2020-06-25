@@ -29,23 +29,40 @@ def extract_langs xml
   unless xml.xpath('//msDesc/msContents/textLang/@otherLangs').empty?
     langs += xml.xpath('//msDesc/msContents/textLang/@otherLangs').first.text.split
   end
-  # binding.pry
   langs.map { |x| ISO_639.find_by_code(x).english_name }.join ';'
 end
 
-# TODO: Email repository list to Emma
-# TODO: Look at 500 fields and figure out what does into "other_info"
-# TODO: Pull in decorations, script, notes, origin into "other_info" as a block http://openn.library.upenn.edu/Data/0032/html/ms_or_045.html
 # TODO: Pull in Vernacular script with titles and names (authors, etc.)
-
+def empty? xml, xpath
+  xml.xpath(xpath).empty?
+end
 
 def extract_provenance xml
-  # TODO: Move origin to other info
-  (prov ||= []) << xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').text
-  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/provenance').empty?
-    prov += xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/provenance').map(&:text).uniq
+  xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/provenance').map(&:text).uniq.join ';'
+end
+
+def extract_other_info xml
+  info = []
+  unless empty? xml, '/TEI/teiHeader/fileDesc/notesStmt/note'
+    info << xml.xpath('/TEI/teiHeader/fileDesc/notesStmt/note').map(&:text).join('\n')
   end
-  prov.join ';'
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').empty?
+    info << "Origin: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').text}"
+  end
+
+  # TODO: Look at 500 fields and figure out what does into "other_info":
+  # TODO: Pull in decorations, script, notes, origin into "other_info" as a block http://openn.library.upenn.edu/Data/0032/html/ms_or_045.html
+  # TODO: add <colophon> as "Colophon: ..."
+  # TODO: add <watermark> as "Watermark: ..."
+  # TODO: add <foliation> as "Foliation: ... "
+  # TODO: add <collation> as "collation: ..."
+  # TODO: add <layout> as "Layout: ..."
+  # TODO: add <script> as "Script: ..."
+  # TODO: add <decoNote> as "DecoNote: ..."
+  # TODO: add <extent> as "Extent: ..."
+
+  # Join all that stuff with newlines between
+  info.join "\n"
 end
 
 def extract_first xml, xpath
@@ -103,6 +120,7 @@ def extract_data file
   manuscript_binding = doc.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/bindingDesc/binding/p').map(&:text).uniq.join ';'
   # manuscript_link
   # other_info
+  other_info = extract_other_info doc
   # provenance
   provenance = extract_provenance doc
   # created_at
@@ -129,6 +147,7 @@ def extract_data file
       materials:                    materials,
       places:                       places,
       manuscript_binding:           manuscript_binding,
+      other_info:                   other_info,
       provenance:                   provenance,
       extent:                       extent,
       layout:                       layout,
@@ -140,5 +159,3 @@ end
 # data = extract_data open tei_file
 #
 # puts data
-
-# puts collection_name 10

@@ -6,8 +6,10 @@ require 'open-uri'
 # pull in the file that parses the data
 require_relative './lib/tei_data'
 
-# source_url = 'http://openn.library.upenn.edu/Data/muslimworld_contents.csv'
 source_csv = ARGV.shift
+abort "Please provide on openn source CSV file" unless source_csv
+abort "Can't find CSV file: '#{source_csv}''"   unless File.exist? source_csv
+
 BASE_URI = 'http://openn.library.upenn.edu/Data'
 
 headers = %i{
