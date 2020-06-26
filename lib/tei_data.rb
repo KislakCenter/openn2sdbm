@@ -56,10 +56,11 @@ def extract_other_info xml
   # TODO: add <watermark> as "Watermark: ..."
   # TODO: add <foliation> as "Foliation: ... "
   # TODO: add <collation> as "collation: ..."
-  # TODO: add <layout> as "Layout: ..."
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout').empty?
+    info << "Layout: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout').text}"
+  end
   # TODO: add <script> as "Script: ..."
-  # TODO: add <decoNote> as "DecoNote: ..."
-  # TODO: add <extent> as "Extent: ..."
+  # TODO: add <decoNote> as "DecoNote: ..." multiple decoNotes?
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').empty?
     info << "Extent: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').text}"
   end
