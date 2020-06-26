@@ -60,6 +60,11 @@ def extract_other_info xml
   # TODO: add <script> as "Script: ..."
   # TODO: add <decoNote> as "DecoNote: ..."
   # TODO: add <extent> as "Extent: ..."
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').empty?
+    info << "Extent: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').text}"
+  end
+
+
 
   # Join all that stuff with newlines between
   info.join "\n"
