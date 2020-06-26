@@ -64,7 +64,7 @@ def extract_other_info xml
     info << "Layout: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout').text}"
   end
   # TODO: add <script> as "Script: ..."
-  # Scriptnote
+  # Script
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/scriptDesc/scriptNote').empty?
     info << "Script: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/scriptDesc/scriptNote').text}"
   end
