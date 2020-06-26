@@ -54,7 +54,8 @@ def extract_other_info xml
   # TODO: Pull in decorations, script, notes, origin into "other_info" as a block http://openn.library.upenn.edu/Data/0032/html/ms_or_045.html
   # TODO: add <colophon> as "Colophon: ..."
   # TODO: add <watermark> as "Watermark: ..."
-  # TODO: add <foliation> as "Foliation: ... "
+
+  # Foliation
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/foliation').empty?
     info << "Foliation: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/foliation').text}"
   end
@@ -63,7 +64,11 @@ def extract_other_info xml
     info << "Layout: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout').text}"
   end
   # TODO: add <script> as "Script: ..."
-  # TODO: add <decoNote> as "DecoNote: ..." multiple decoNotes?
+  # Scriptnote
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/scriptDesc/scriptNote').empty?
+    info << "Script: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/scriptDesc/scriptNote').text}"
+  end
+  # Deconotes
   unless empty? xml, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote'
     info << "Deconotes: " + xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote').map(&:text).join("\n")
   end
