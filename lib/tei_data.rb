@@ -44,7 +44,7 @@ end
 def extract_other_info xml
   info = []
   unless empty? xml, '/TEI/teiHeader/fileDesc/notesStmt/note'
-    info << xml.xpath('/TEI/teiHeader/fileDesc/notesStmt/note').map(&:text).join('\n')
+    info << "Notes: " + xml.xpath('/TEI/teiHeader/fileDesc/notesStmt/note').map(&:text).join("\n")
   end
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').empty?
     info << "Origin: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').text}"
@@ -55,12 +55,20 @@ def extract_other_info xml
   # TODO: add <colophon> as "Colophon: ..."
   # TODO: add <watermark> as "Watermark: ..."
   # TODO: add <foliation> as "Foliation: ... "
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/foliation').empty?
+    info << "Foliation: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/foliation').text}"
+  end
   # TODO: add <collation> as "collation: ..."
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout').empty?
     info << "Layout: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout').text}"
   end
   # TODO: add <script> as "Script: ..."
   # TODO: add <decoNote> as "DecoNote: ..." multiple decoNotes?
+  unless empty? xml, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote'
+    info << "Deconotes: " + xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote').map(&:text).join("\n")
+  end
+
+  # Extent
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').empty?
     info << "Extent: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').text}"
   end
@@ -138,9 +146,9 @@ def extract_data file
   # superceded_by_id
   # draft
   # extent
-  extent = extract_first doc, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent'
+  # extent = extract_first doc, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent'
   # layout
-  layout = extract_first doc, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout'
+  # layout = extract_first doc, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout'
 
   {
       source_catalog_or_lot_number: source_catalog_or_lot_number,
@@ -155,8 +163,8 @@ def extract_data file
       manuscript_binding:           manuscript_binding,
       other_info:                   other_info,
       provenance:                   provenance,
-      extent:                       extent,
-      layout:                       layout,
+      #extent:                       extent,
+      #layout:                       layout,
   }
 end
 #
