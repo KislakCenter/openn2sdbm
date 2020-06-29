@@ -32,7 +32,21 @@ def extract_langs xml
   langs.map { |x| ISO_639.find_by_code(x).english_name }.join ';'
 end
 
-# TODO: Pull in Vernacular script with titles and names (authors, etc.)
+#authors
+def extract_authors xml
+  authors = []
+  xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem/author').each do|author_node|
+    name = author_node.xpath('./persName[not(@type="vernacular")]').text
+    # see if there's vernacular persName 
+    # xpath always returns a nodeset, so we have to see if it's empty or not
+    unless author_node.xpath('./persName[@type="vernacular"]').empty?
+      name = "#{name} #{author_node.xpath('./persName[@type="vernacular"]').text}"
+    end
+    authors << name
+  end
+  authors
+end
+
 def empty? xml, xpath
   xml.xpath(xpath).empty?
 end
@@ -89,7 +103,7 @@ def extract_other_info xml
   end
   # Keywords
   unless empty? xml, '/TEI/teiHeader/profileDesc/textClass/keywords/term'
-    info << "Keywords: " + xml.xpath('/TEI/teiHeader/profileDesc/textClass/keywords/term').map(&:text).join(', ')
+    info << "Keywords: " + xml.xpath('/TEI/teiHeader/profileDesc/textClass/keywords/term').map(&:text).join(';')
   end
 
   # Join all that stuff with newlines between
@@ -119,8 +133,8 @@ def extract_data file
   # sale_price
   # titles
   titles = doc.xpath('//msItem/title[not(@type="vernacular")]').map(&:text).uniq.join ';'
-  # authors =
-  authors = doc.xpath('//msContents/msItem/author/persName[not(@type="vernacular")]').map(&:text).uniq.join ';'
+  #authors
+  authors = extract_authors doc
   # dates
   dates = doc.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/origDate').map(&:text).uniq.join ';'
   # date_ranges
