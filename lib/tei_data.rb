@@ -43,22 +43,37 @@ end
 
 def extract_other_info xml
   info = []
+  # Summary
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/summary').empty?
+    info << "Summary: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/summary').text}"
+  end
+  # Notes
   unless empty? xml, '/TEI/teiHeader/fileDesc/notesStmt/note'
     info << xml.xpath('/TEI/teiHeader/fileDesc/notesStmt/note').map(&:text).join("\n")
   end
-  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').empty?
-    info << "Origin: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').text}"
+  # Extent
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').empty?
+    info << "Extent: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').text}"
   end
-
-  # TODO: Look at 500 fields and figure out what does into "other_info":
-  # TODO: Pull in decorations, script, notes, origin into "other_info" as a block http://openn.library.upenn.edu/Data/0032/html/ms_or_045.html
-  # TODO: add <colophon> as "Colophon: ..."
-  # TODO: add <watermark> as "Watermark: ..."
-  # TODO: add <collation> as "collation: ..."
-
   # Foliation
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/foliation').empty?
     info << "Foliation: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/foliation').text}"
+  end
+  # Collation
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/collation/p').empty?
+    info << "Collation: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/collation/p').text}"
+  end
+  # Origin
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').empty?
+    info << "Origin: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/p').text}"
+  end
+  # Colophon
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem/colophon').empty?
+    info << "Colophon: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem/colophon').text}"
+  end
+  # Watermark
+  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/support/watermark').empty?
+    info << "Watermark: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/support/watermark').text}"
   end
   # Layout
   unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout').empty?
@@ -69,12 +84,12 @@ def extract_other_info xml
     info << "Script: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/scriptDesc/scriptNote').text}"
   end
   # Deconotes
-  unless empty? xml, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote[not(@n)]'
-    info << "Deconotes: " + xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote[not(@n)]').text
+  unless xml.xpath( '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote[not(@n)]').empty?
+    info << "Decoration: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/decoDesc/decoNote[not(@n)]').text}"
   end
-  # Extent
-  unless xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').empty?
-    info << "Extent: #{xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent').text}"
+  # Keywords
+  unless empty? xml, '/TEI/teiHeader/profileDesc/textClass/keywords/term'
+    info << "Keywords: " + xml.xpath('/TEI/teiHeader/profileDesc/textClass/keywords/term').map(&:text).join(', ')
   end
 
   # Join all that stuff with newlines between
@@ -135,6 +150,7 @@ def extract_data file
   # manuscript_binding
   manuscript_binding = doc.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/bindingDesc/binding/p').map(&:text).uniq.join ';'
   # manuscript_link
+  manuscript_link = 
   # other_info
   other_info = extract_other_info doc
   # provenance
@@ -148,9 +164,7 @@ def extract_data file
   # superceded_by_id
   # draft
   # extent
-  # extent = extract_first doc, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/supportDesc/extent'
   # layout
-  # layout = extract_first doc, '/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/objectDesc/layoutDesc/layout'
 
   {
       source_catalog_or_lot_number: source_catalog_or_lot_number,
@@ -165,8 +179,6 @@ def extract_data file
       manuscript_binding:           manuscript_binding,
       other_info:                   other_info,
       provenance:                   provenance,
-      #extent:                       extent,
-      #layout:                       layout,
   }
 end
 #
