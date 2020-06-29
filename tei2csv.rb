@@ -34,7 +34,7 @@ CSV headers: true do |csv|
   CSV.parse URI.open(source_csv).read, headers: true do |row|
     path = row['path']
     base = File.basename path
-    tei_file = "#{BASE_URI}/#{path}/data/#{base}_TEI.xml"
+    tei_file = "#{BASE_URI}/#{path}/html/#{base}.html"
     out_row = extract_data URI.open tei_file
     # we need to add collection and url
     out_row[:collection] = collection_name row['repository_id']
