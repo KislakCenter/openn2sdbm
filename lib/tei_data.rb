@@ -150,7 +150,6 @@ def extract_data file
   # manuscript_binding
   manuscript_binding = doc.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/physDesc/bindingDesc/binding/p').map(&:text).uniq.join ';'
   # manuscript_link
-  manuscript_link = 
   # other_info
   other_info = extract_other_info doc
   # provenance
