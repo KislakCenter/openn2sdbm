@@ -74,9 +74,9 @@ def extract_scribes xml
   # </respStmt>
   scribes = []
   xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem/respStmt[resp/text()="scribe"]').each do |scribe_node|
-    scribe = scribe_node.xpath('./persName[not(@type="vernacular")]').text
+    name = scribe_node.xpath('./persName[not(@type="vernacular")]').text
     unless scribe_node.xpath('./persName[@type="vernacular"]').empty?
-      name = "#{name} #{artist_node.xpath('./persName[@type="vernacular"]').text}"
+      name = "#{name} #{scribe_node.xpath('./persName[@type="vernacular"]').text}"
     end
     scribes << name
   end
