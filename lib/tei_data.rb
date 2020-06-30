@@ -23,6 +23,20 @@ def collection_name collection_id
   collection_data[sprintf '%04d', collection_id.to_i]
 end
 
+def extract_titles xml 
+  titles = []
+  xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem').each do|msItem_node|
+    title = msItem_node.xpath('./title[not(@type="vernacular")]').text
+    # see if there's vernacular title 
+    # xpath always returns a nodeset, so we have to see if it's empty or not
+    unless msItem_node.xpath('./title[@type="vernacular"]').empty?
+      title = "#{title} #{msItem_node.xpath('./title[@type="vernacular"]').text}"
+    end
+    titles << title
+  end
+  titles
+end
+
 def extract_langs xml
   langs = []
   langs << xml.xpath('//msDesc/msContents/textLang/@mainLang').first.text
@@ -168,16 +182,16 @@ def extract_data file
   # sale_sold
   # sale_price
   # titles
-  titles = doc.xpath('//msItem/title[not(@type="vernacular")]').map(&:text).uniq.join ';'
+  titles = extract_titles(doc).join ';'
   #authors
-  authors = extract_authors doc
+  authors = extract_authors(doc).join ';'
   # dates
   dates = doc.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/origDate').map(&:text).uniq.join ';'
   # date_ranges
   # artists
-  artists = extract_artists doc
+  artists = extract_artists(doc).join ';'
   # scribes
-  scribes = extract_scribes doc
+  scribes = extract_scribes(doc).join ';'
   # languages
   languages = extract_langs doc
   # materials
