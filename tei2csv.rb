@@ -35,7 +35,9 @@ CSV headers: true do |csv|
     path = row['path']
     base = File.basename path
     tei_file = "#{BASE_URI}/#{path}/data/#{base}_TEI.xml"
-    html_file = "#{BASE_URI}/html/#{base}.html"
+    # http://openn.library.upenn.edu/Data/0011/html/1805_003_042.html
+    repo_id = path.split('/').first
+    html_file = "#{BASE_URI}/#{repo_id}/html/#{base}.html"
     out_row = extract_data URI.open tei_file
     # we need to add collection and url
     out_row[:collection] = collection_name row['repository_id']
