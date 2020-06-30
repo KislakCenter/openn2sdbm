@@ -47,6 +47,42 @@ def extract_authors xml
   authors
 end
 
+def extract_artists xml
+  # <respStmt>
+  #   <resp>artist</resp>
+  #   <persName type="authority">Saʻdī, Ḥusayn, active 1838</persName>
+  #   <persName type="vernacular">سعدي، حسين،</persName>
+  # </respStmt>
+  artists = []
+  xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem/respStmt[resp/text()="artist"]').each do |artist_node|
+    name = artist_node.xpath('./persName[not(@type="vernacular")]').text
+    # check for vernacular persName
+    # xpath returns nodeset, so we need to check if it's empty
+    unless artist_node.xpath('./persName[@type="vernacular"]').empty?
+      name = "#{name} #{artist_node.xpath('./persName[@type="vernacular"]').text}"
+    end
+    artists << name
+  end
+  artists
+end
+
+def extract_scribes xml
+  # <respStmt>
+  #   <resp>scribe</resp>
+  #   <persName type="authority">Saʻdī, Ḥusayn, active 1838</persName>
+  #   <persName type="vernacular">سعدي، حسين،</persName>
+  # </respStmt>
+  scribes = []
+  xml.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem/respStmt[resp/text()="scribe"]').each do |scribe_node|
+    scribe = scribe_node.xpath('./persName[not(@type="vernacular")]').text
+    unless scribe_node.xpath('./persName[@type="vernacular"]').empty?
+      name = "#{name} #{artist_node.xpath('./persName[@type="vernacular"]').text}"
+    end
+    scribes << name
+  end
+  scribes
+end
+
 def empty? xml, xpath
   xml.xpath(xpath).empty?
 end
@@ -139,9 +175,9 @@ def extract_data file
   dates = doc.xpath('/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/origin/origDate').map(&:text).uniq.join ';'
   # date_ranges
   # artists
-  artists = doc.xpath('//msContents/msItem/respStmt/resp[text()="artist"]/../persName[not(@type="vernacular")]').map(&:text).uniq.join ';'
+  artists = extract_artists doc
   # scribes
-  scribes = doc.xpath('//msContents/msItem/respStmt/resp[text()="scribe"]/../persName[not(@type="vernacular")]').map(&:text).uniq.join ';'
+  scribes = extract_scribes doc
   # languages
   languages = extract_langs doc
   # materials
