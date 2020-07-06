@@ -52,6 +52,7 @@ end
 def extract_authors(xml)
   authors = []
   xml.xpath("/TEI/teiHeader/fileDesc/sourceDesc/msDesc/msContents/msItem/author").each do |author_node|
+    next if author_node.xpath('./persName').empty?
     name = author_node.xpath('./persName[not(@type="vernacular")]').text
     # see if there's vernacular persName
     # xpath always returns a nodeset, so we have to see if it's empty or not
@@ -106,7 +107,7 @@ end
 def extract_provenance(xml)
   xml.xpath("/TEI/teiHeader/fileDesc/sourceDesc/msDesc/history/provenance").map { |n|
     # provenance is multivalued
-    "#{MULTI_VALUE_SEP}#{MULTI_VALUE_SEP}#{n.text}"
+    "#{MULTI_VALUE_SEP}#{MULTI_VALUE_SEP}#{n.text}".tr('"', "'")
   }.uniq.join ";"
 end
 
